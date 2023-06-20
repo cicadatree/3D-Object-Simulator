@@ -3,6 +3,8 @@ from pygame.locals import *
 from OpenGL.GL import *
 from OpenGL.GLU import *
 
+
+
 def draw_cube():
     vertices = (
         (1, -1, -1),
@@ -40,8 +42,8 @@ def draw_menu():
     font = pygame.font.Font(None, 36)
     text = font.render("Press SPACE to start the game", True, (255, 255, 255))
     text_rect = text.get_rect(center=(400, 300))
-    pygame.draw.rect(screen, (0, 0, 0), (0, 0, 800, 600))
-    screen.blit(text, text_rect.topleft)
+    pygame.draw.rect(screen, (255, 255, 255), (0, 0, 800, 600))
+    screen.blit(text, text_rect.center)
 
 def main():
     global screen
@@ -91,12 +93,21 @@ def main():
                 i, j = event.rel
                 xMove = i / 2
                 yMove = j / 2
-                glRotatef(1, -yMove, xMove, 0)
+                glRotatef(1, yMove, xMove, 0)
+
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    pygame.quit()
+                    quit()
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-        draw_cube()
+        
+        if not menu_active:
+            draw_cube()
+            
         pygame.display.flip()
         pygame.time.wait(10)
+    
 
 
 if __name__ == "__main__":
