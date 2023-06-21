@@ -4,7 +4,6 @@ from OpenGL.GL import *
 from OpenGL.GLU import *
 
 
-
 def draw_cube():
     vertices = (
         (1, -1, -1),
@@ -40,24 +39,17 @@ def draw_cube():
 
 def draw_menu():
     font = pygame.font.Font(None, 36)
-    text = font.render("Press SPACE to start the game", True, (255, 255, 255))
+    text = font.render("Press SPACE to start the game", True, (0, 0, 0))
     text_rect = text.get_rect(center=(400, 300))
     pygame.draw.rect(screen, (255, 255, 255), (0, 0, 800, 600))
-    screen.blit(text, text_rect.center)
+    screen.blit(text, text_rect.topleft)
 
 def main():
     global screen
 
     pygame.init()
     display = (800, 600)
-    screen = pygame.display.set_mode(display, DOUBLEBUF | OPENGL)
-
-    gluPerspective(45, (display[0] / display[1]), 0.1, 50.0)
-    glTranslatef(0.0, 0.0, -5)
-
-    xMove = 0
-    yMove = 0
-    mouse_down = False
+    screen = pygame.display.set_mode(display)
 
     menu_active = True
 
@@ -71,9 +63,18 @@ def main():
                 if event.key == pygame.K_SPACE:
                     menu_active = False
 
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+        screen.fill((0, 0, 0))  # Fill the screen with black
         draw_menu()
         pygame.display.flip()
+
+    screen = pygame.display.set_mode(display, DOUBLEBUF|OPENGL)  # Switch to an OpenGL context
+
+    gluPerspective(45, (display[0] / display[1]), 0.1, 50.0)
+    glTranslatef(0.0, 0.0, -5)
+
+    xMove = 0
+    yMove = 0
+    mouse_down = False
 
     while True:
         for event in pygame.event.get():
@@ -93,21 +94,18 @@ def main():
                 i, j = event.rel
                 xMove = i / 2
                 yMove = j / 2
-                glRotatef(1, yMove, xMove, 0)
+                glRotatef(2, yMove, xMove, 0)
 
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     pygame.quit()
                     quit()
 
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-        
-        if not menu_active:
-            draw_cube()
-            
+        glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
+        draw_cube()
         pygame.display.flip()
         pygame.time.wait(10)
-    
+
 
 
 if __name__ == "__main__":
