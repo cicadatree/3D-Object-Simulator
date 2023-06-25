@@ -1,56 +1,73 @@
+from __future__ import annotations
 import pygame
 from pygame.locals import *
 from OpenGL.GL import *
 from OpenGL.GLU import *
 
 
-def draw_cube():
-    vertices = (
-        (1, -1, -1),
-        (1, 1, -1),
-        (-1, 1, -1),
-        (-1, -1, -1),
-        (1, -1, 1),
-        (1, 1, 1),
-        (-1, -1, 1),
-        (-1, 1, 1)
-    )
+class Window:
+    def __init__(self):
+        pygame.init()
+        self.display = (800, 600)
+        self.screen = pygame.display.set_mode(self.display)
+        
+    def draw_menu(self):
+        self.font = pygame.font.Font(None, 36)
+        self.text = self.font.render("Press SPACE to start the game", True, (0, 0, 0))
+        self.text_rect = self.text.get_rect(center=(400, 300))
+        pygame.draw.rect(self.screen, (255, 255, 255), (0, 0, 800, 600))
+        self.screen.blit(self.text, self.text_rect.topleft)
 
-    edges = (
-        (0, 1),
-        (0, 3),
-        (0, 4),
-        (2, 1),
-        (2, 3),
-        (2, 7),
-        (6, 3),
-        (6, 4),
-        (6, 7),
-        (5, 1),
-        (5, 4),
-        (5, 7)
-    )
 
-    glBegin(GL_LINES)
-    for edge in edges:
-        for vertex in edge:
-            glVertex3fv(vertices[vertex])
-    glEnd()
+class Shape:
+    def __init__(self):
+        pass
 
-def draw_menu():
-    font = pygame.font.Font(None, 36)
-    text = font.render("Press SPACE to start the game", True, (0, 0, 0))
-    text_rect = text.get_rect(center=(400, 300))
-    pygame.draw.rect(screen, (255, 255, 255), (0, 0, 800, 600))
-    screen.blit(text, text_rect.topleft)
+    def draw_shape(self):
+        pass
+
+
+class Cube(Shape):
+    def __init__(self):
+        super().__init__()
+
+    def draw_shape(self):
+        self.vertices = (
+            (1, -1, -1),
+            (1, 1, -1),
+            (-1, 1, -1),
+            (-1, -1, -1),
+            (1, -1, 1),
+            (1, 1, 1),
+            (-1, -1, 1),
+            (-1, 1, 1)
+        )
+
+        self.edges = (
+            (0, 1),
+            (0, 3),
+            (0, 4),
+            (2, 1),
+            (2, 3),
+            (2, 7),
+            (6, 3),
+            (6, 4),
+            (6, 7),
+            (5, 1),
+            (5, 4),
+            (5, 7)
+        )
+
+        glBegin(GL_LINES)
+        for edge in self.edges:
+            for vertex in edge:
+                glVertex3fv(self.vertices[vertex])
+        glEnd()
+
 
 def main():
-    global screen
-
-    pygame.init()
-    display = (800, 600)
-    screen = pygame.display.set_mode(display)
-
+    cube_1 = Cube()
+    window = Window()
     menu_active = True
 
     while menu_active:
@@ -63,13 +80,13 @@ def main():
                 if event.key == pygame.K_SPACE:
                     menu_active = False
 
-        screen.fill((0, 0, 0))  # Fill the screen with black
-        draw_menu()
+        window.screen.fill((0, 0, 0))  # Fill the screen with black
+        window.draw_menu()
         pygame.display.flip()
 
-    screen = pygame.display.set_mode(display, DOUBLEBUF|OPENGL)  # Switch to an OpenGL context
+    window.screen = pygame.display.set_mode(window.display, DOUBLEBUF|OPENGL)  # Switch to an OpenGL context
 
-    gluPerspective(45, (display[0] / display[1]), 0.1, 50.0)
+    gluPerspective(45, (window.display[0] / window.display[1]), 0.1, 50.0)
     glTranslatef(0.0, 0.0, -5)
 
     xMove = 0
@@ -102,7 +119,7 @@ def main():
                     quit()
 
         glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
-        draw_cube()
+        cube_1.draw_shape()
         pygame.display.flip()
         pygame.time.wait(10)
 
