@@ -8,15 +8,33 @@ from OpenGL.GLU import *
 class Window:
     def __init__(self):
         pygame.init()
+        self.font_size = 24
         self.display = (800, 600)
         self.screen = pygame.display.set_mode(self.display)
+        self.font = pygame.font.Font(None, self.font_size)
         
-    def draw_menu(self):
-        self.font = pygame.font.Font(None, 36)
-        self.text = self.font.render("Press SPACE to start the game", True, (0, 0, 0))
-        self.text_rect = self.text.get_rect(center=(400, 300))
-        pygame.draw.rect(self.screen, (255, 255, 255), (0, 0, 800, 600))
-        self.screen.blit(self.text, self.text_rect.topleft)
+    def draw_menu(self, events):
+        self.screen.fill((255, 255, 255))
+        action1 = self.draw_button("Render Cube", (275, 250, 250, 50), 1, events)
+        action2 = self.draw_button("Render Triangular Prism", (275, 320, 250, 50), 2, events)
+        return action1 or action2
+        
+    def draw_button(self, text, rect, action_id, events):
+        # Draw button and text
+        button = pygame.draw.rect(self.screen, (0, 128, 255), rect)
+        text_surface = self.font.render(text, True, (255, 255, 255))
+        text_rect = text_surface.get_rect(center=button.center)
+        self.screen.blit(text_surface, text_rect)
+        
+        # Check for clicks
+        for event in events:
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 1 and button.collidepoint(event.pos):
+                    return action_id
+
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 1 and button.collidepoint(event.pos):
+                    return action_id
 
 
 class Shape:
@@ -65,24 +83,68 @@ class Cube(Shape):
         glEnd()
 
 
+class TriangularPrism(Shape):
+    def __init__(self):
+        super().__init__()
+
+    def draw_shape(self):
+        # Defining the vertices
+        self.vertices = (
+            (1, -1, -1),  # A: Bottom triangle
+            (0, -1, 1),   # B
+            (-1, -1, -1), # C
+            (1, 1, -1),   # A': Top triangle
+            (0, 1, 1),    # B'
+            (-1, 1, -1)   # C'
+        )
+
+        # Defining the edges
+        self.edges = (
+            (0, 1),  # Bottom triangle edges
+            (1, 2),
+            (2, 0),
+            (3, 4),  # Top triangle edges
+            (4, 5),
+            (5, 3),
+            (0, 3),  # Edges connecting bottom and top triangles
+            (1, 4),
+            (2, 5)
+        )
+
+        # Drawing the shape using OpenGL
+        glBegin(GL_LINES)
+        for edge in self.edges:
+            for vertex in edge:
+                glVertex3fv(self.vertices[vertex])
+        glEnd()
+
+
 def main():
     cube_1 = Cube()
+    triangular_prism_1 = TriangularPrism()
     window = Window()
     menu_active = True
+    selected_shape = None
 
     while menu_active:
-        for event in pygame.event.get():
+        events = pygame.event.get()
+        
+        for event in events:
             if event.type == pygame.QUIT:
                 pygame.quit()
                 quit()
 
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_SPACE:
-                    menu_active = False
-
-        window.screen.fill((0, 0, 0))  # Fill the screen with black
-        window.draw_menu()
+        action = window.draw_menu(events)
         pygame.display.flip()
+        
+        if action == 1:
+            selected_shape = cube_1
+            menu_active = False
+        elif action == 2:
+            selected_shape = triangular_prism_1
+            menu_active = False
+
+        pygame.time.wait(10)
 
     window.screen = pygame.display.set_mode(window.display, DOUBLEBUF|OPENGL)  # Switch to an OpenGL context
 
@@ -91,7 +153,7 @@ def main():
 
     xMove = 0
     yMove = 0
-    mouse_down = False
+    left_mouse_button_down = False  # Initialize outside of the loop
 
     while True:
         for event in pygame.event.get():
@@ -101,13 +163,13 @@ def main():
 
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:  # 1 indicates the left mouse button
-                    mouse_down = True
+                    left_mouse_button_down = True
 
             if event.type == pygame.MOUSEBUTTONUP:
                 if event.button == 1:  # 1 indicates the left mouse button
-                    mouse_down = False
+                    left_mouse_button_down = False
 
-            if event.type == pygame.MOUSEMOTION and mouse_down:
+            if event.type == pygame.MOUSEMOTION and left_mouse_button_down:
                 i, j = event.rel
                 xMove = i / 2
                 yMove = j / 2
@@ -119,11 +181,10 @@ def main():
                     quit()
 
         glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
-        cube_1.draw_shape()
+        selected_shape.draw_shape()
         pygame.display.flip()
         pygame.time.wait(10)
 
 
-
 if __name__ == "__main__":
-    main() 
+    main()
