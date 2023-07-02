@@ -25,17 +25,12 @@ class Window:
         text_surface = self.font.render(text, True, (255, 255, 255))
         text_rect = text_surface.get_rect(center=button.center)
         self.screen.blit(text_surface, text_rect)
-        
+
         # Check for clicks
         for event in events:
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1 and button.collidepoint(event.pos):
                     return action_id
-
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                if event.button == 1 and button.collidepoint(event.pos):
-                    return action_id
-
 
 class Shape:
     def __init__(self):
@@ -48,8 +43,6 @@ class Shape:
 class Cube(Shape):
     def __init__(self):
         super().__init__()
-
-    def draw_shape(self):
         self.vertices = (
             (1, -1, -1),
             (1, 1, -1),
@@ -76,6 +69,7 @@ class Cube(Shape):
             (5, 7)
         )
 
+    def draw_shape(self):
         glBegin(GL_LINES)
         for edge in self.edges:
             for vertex in edge:
@@ -86,9 +80,6 @@ class Cube(Shape):
 class TriangularPrism(Shape):
     def __init__(self):
         super().__init__()
-
-    def draw_shape(self):
-        # Defining the vertices
         self.vertices = (
             (1, -1, -1),  # A: Bottom triangle
             (0, -1, 1),   # B
@@ -111,6 +102,7 @@ class TriangularPrism(Shape):
             (2, 5)
         )
 
+    def draw_shape(self):
         # Drawing the shape using OpenGL
         glBegin(GL_LINES)
         for edge in self.edges:
@@ -184,7 +176,6 @@ def main():
         selected_shape.draw_shape()
         pygame.display.flip()
         pygame.time.wait(10)
-
 
 if __name__ == "__main__":
     main()
